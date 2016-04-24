@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Tool;
 
@@ -52,7 +53,7 @@ namespace Tests
 
             testList.Clear();
             testList.AddRange(firstList);
-            testClass.ModifyList(dirPath, listMode[1], testList, new List<string> { ".cs", ".cpp" });
+            testClass.ModifyList(dirPath, listMode[1], testList, needExt);
             Assert.IsTrue(testList.Count == 6);
             Assert.IsTrue(testList.SequenceEqual(resultList3));
 
@@ -70,42 +71,88 @@ namespace Tests
 
         }
 
+        [TestMethod]
+        public void CreateFileTest()
+        {
+            var fileList1 = new List<string> { "d:\\1\\11.txt", "d:\\1\\2\\21.txt", "d:\\1\\2\\3\\31.txt", 
+                                               "d:\\1\\12.cpp", "d:\\1\\2\\22.cpp", "d:\\1\\2\\3\\32.cpp",
+                                               "d:\\1\\13.cs",  "d:\\1\\2\\23.cs",  "d:\\1\\2\\3\\33.cs" };
 
-        //public void ModifyList(string dirPath, string mode, List<string> list, List<string> needExt)
-        //{
-        //    switch (mode)
-        //    {
-        //        case "all":
-        //            for (int i = 0; i < list.Count; i++)
-        //            {
-        //                list[i] = list[i].RemoveStartFolder(dirPath);
-        //            }
-        //            break;
-        //        case "cpp":
-        //            if (needExt == null)
-        //            {
-        //                needExt = NeedExt;
-        //            }
+            var fileList2 = new List<string> { "txt.11", "txt.12\\2", "txt.13\\3\\2", 
+                                                 "ppc.21", "ppc.22\\2", "ppc.23\\3\\2",
+                                                 "sc.31",  "sc.32\\2",  "sc.33\\3\\2" };
 
-        //            list.RemoveAll(t => !needExt.Contains(Path.GetExtension(t)));
-        //            for (int i = 0; i < list.Count; i++)
-        //            {
-        //                list[i] = list[i].AddStringToPath(" /");
-        //            }
-        //            break;
-        //        case "reversed1":
-        //            for (int i = 0; i < list.Count; i++)
-        //            {
-        //                list[i] = list[i].ReverseFolderPath();
-        //            }
-        //            break;
-        //        case "reversed2":
-        //            for (int i = 0; i < list.Count; i++)
-        //            {
-        //                list[i] = list[i].ReverseAllPath();
-        //            }
-        //            break;
-        //    }
-        //}
+            string fileName1 = "file1.txt";
+            string fileName2 = "file2.txt";
+
+            var testClass = new FileList();
+
+            testClass.CreateFile(fileList1, fileName1);
+
+            Assert.IsTrue(File.Exists(fileName1));
+
+            var testFileList = new List<string>();
+            using (var fs = new FileStream(fileName1, FileMode.Open, FileAccess.Read))
+            {
+                using (var sr = new StreamReader(fs))
+                {
+                    string line;
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        testFileList.Add(line);
+                    }
+                }
+            }
+            Assert.IsTrue(testFileList.SequenceEqual(fileList1));
+
+
+            testClass.CreateFile(fileList2, fileName2);
+
+            Assert.IsTrue(File.Exists(fileName2));
+
+            testFileList = new List<string>();
+            using (var fs = new FileStream(fileName2, FileMode.Open, FileAccess.Read))
+            {
+                using (var sr = new StreamReader(fs))
+                {
+                    string line;
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        testFileList.Add(line);
+                    }
+                }
+            }
+            Assert.IsTrue(testFileList.SequenceEqual(fileList2));
+
+            File.Delete(fileName1);
+            File.Delete(fileName2);
+        }
+
+
+        [TestMethod]
+        public void WalkDirTreeTest()
+        {
+            var fileList1 = new List<string> { "1.cpp", "2\\2.cs", "2\\3\\31.cpp", "2\\3\\32.exe" };
+
+            var testClass = new FileList();
+            Directory.CreateDirectory("1");
+            File.Create("1\\1.cpp").Close();
+            Directory.CreateDirectory("1\\2");
+            File.Create("1\\2\\2.cs").Close();
+            Directory.CreateDirectory("1\\2\\3");
+            File.Create("1\\2\\3\\31.cpp").Close();
+            File.Create("1\\2\\3\\32.exe").Close();
+
+            var rootDir = new DirectoryInfo(Directory.GetCurrentDirectory() + "\\1\\");
+            
+            var testFileList = testClass.WalkDirTree(rootDir).Result;
+            for (int i = 0; i < testFileList.Count; i++)
+            {
+                testFileList[i] = testFileList[i].RemoveStartFolder(rootDir.FullName);
+            }
+            Assert.IsTrue(testFileList.SequenceEqual(fileList1));
+
+            Directory.Delete("1", true);
+        }
     }
 }

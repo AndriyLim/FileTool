@@ -11,7 +11,6 @@ namespace Tool
         private const string DefaultFileName = "results.txt";
         private static readonly List<string> NeedExt = new List<string> { ".cpp" };
 
-        // TODO сделать тест сами создаем проверяем и удаляем
         public async Task<List<string>> FillList(string dirPath, string mode, List<string> needExt = null)
         {
             var rootDir = new DirectoryInfo(dirPath);
@@ -28,7 +27,6 @@ namespace Tool
             return list;
         }
 
-        // TODO сделать тест сами создаем проверяем и удаляем
         public async Task<List<string>> WalkDirTree(DirectoryInfo rootDir)
         {
             return Directory.EnumerateFiles(rootDir.FullName, "*.*", SearchOption.AllDirectories).ToList();
@@ -71,7 +69,6 @@ namespace Tool
             }
         }
 
-        // TODO сделать тест
         public void CreateFile(List<string> fileList, string fileName)
         {
             if (fileName == null)
