@@ -22,17 +22,29 @@ namespace Tool
 
             var list = await WalkDirTree(rootDir);
 
-            ModifyList(dirPath, mode, list, needExt);
+            ModifyList(list, mode, dirPath, needExt);
 
             return list;
         }
 
+        /// <summary>
+        /// get files list from base directory
+        /// </summary>
+        /// <param name="rootDir">base directory full path</param>
+        /// <returns>files list from base directory</returns>
         public async Task<List<string>> WalkDirTree(DirectoryInfo rootDir)
         {
             return Directory.EnumerateFiles(rootDir.FullName, "*.*", SearchOption.AllDirectories).ToList();
         }
 
-        public void ModifyList(string dirPath, string mode, List<string> list, List<string> needExt)
+        /// <summary>
+        /// modify list to some type
+        /// </summary>
+        /// <param name="list">list to modify</param>
+        /// <param name="mode">modify mode</param>
+        /// <param name="dirPath">base directory path</param>
+        /// <param name="needExt">mask file list</param>
+        public void ModifyList(List<string> list, string mode, string dirPath, List<string> needExt)
         {
             switch (mode)
             {

@@ -41,31 +41,31 @@ namespace Tests
 
             testList.Clear();
             testList.AddRange(firstList);
-            testClass.ModifyList(dirPath, listMode[0], testList, null);
+            testClass.ModifyList(testList, listMode[0], dirPath, null);
             Assert.IsTrue(testList.Count == 9);
             Assert.IsTrue(testList.SequenceEqual(resultList1));
 
             testList.Clear();
             testList.AddRange(firstList);
-            testClass.ModifyList(dirPath, listMode[1], testList, null);
+            testClass.ModifyList(testList, listMode[1], dirPath, null);
             Assert.IsTrue(testList.Count == 3);
             Assert.IsTrue(testList.SequenceEqual(resultList2));
 
             testList.Clear();
             testList.AddRange(firstList);
-            testClass.ModifyList(dirPath, listMode[1], testList, needExt);
+            testClass.ModifyList(testList, listMode[1], dirPath, needExt);
             Assert.IsTrue(testList.Count == 6);
             Assert.IsTrue(testList.SequenceEqual(resultList3));
 
             testList.Clear();
             testList.AddRange(firstList);
-            testClass.ModifyList(dirPath, listMode[2], testList, null);
+            testClass.ModifyList(testList, listMode[2], dirPath, null);
             Assert.IsTrue(testList.Count == 9);
             Assert.IsTrue(testList.SequenceEqual(resultList4));
 
             testList.Clear();
             testList.AddRange(firstList);
-            testClass.ModifyList(dirPath, listMode[3], testList, null);
+            testClass.ModifyList(testList, listMode[3], dirPath, null);
             Assert.IsTrue(testList.Count == 9);
             Assert.IsTrue(testList.SequenceEqual(resultList5));
 
