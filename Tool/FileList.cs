@@ -2,83 +2,76 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Tool
 {
-    public class FileList : IFileListBase<string>
+    public class FileList : IFileList<string>
     {
         private const string DefaultFileName = "results.txt";
+        private static readonly List<string> NeedExt = new List<string> { ".cpp" };
 
-        public async Task<List<string>> WalkDirThree(DirectoryInfo rootDir, List<string> notInclude)
-        {
-            var listFiles = Directory.EnumerateFiles(rootDir.FullName, "*.*", SearchOption.AllDirectories).ToList();
-            if (notInclude != null)
-            {
-                listFiles.RemoveAll(t => notInclude.Any(v => Path.GetExtension(t) == v));
-            }
-
-            return listFiles;
-
-
-
-            //var listFiles = new List<MyInfoFile>();
-
-            //try
-            //{
-            //    foreach (FileInfo fi in rootDir.GetFiles())
-            //    {
-            //        var infoFile = new MyInfoFile(PathStringOperations.RemoveStartFolder(fi.FullName, startDir));
-            //        if ((notInclude == null) || (notInclude.All(t => t != fi.Extension)))
-            //        {
-            //            listFiles.Add(infoFile);
-            //        }
-            //    }
-            //}
-            //catch (UnauthorizedAccessException UAE)
-            //{
-            //    WriteLog(UAE.Message);
-            //}
-            //catch (DirectoryNotFoundException DNFE)
-            //{
-            //    WriteLog(DNFE.Message);
-            //}
-
-            //try
-            //{
-            //    foreach (DirectoryInfo di in rootDir.GetDirectories())
-            //    {
-            //        listFiles.AddRange(WalkDirThree(di, startDir, notInclude));
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    WriteLog(ex.Message);
-            //}
-
-            //return listFiles;
-        }
-
-        public async Task<List<string>> FillList(string dirPath, string mode, List<string> notInclude = null)
+        // TODO сделать тест сами создаем проверяем и удаляем
+        public async Task<List<string>> FillList(string dirPath, string mode, List<string> needExt = null)
         {
             var rootDir = new DirectoryInfo(dirPath);
-            
+
             if (!rootDir.Exists)
             {
-                throw new DirectoryNotFoundException(string.Format("Directory {0} not found", dirPath));
+                throw new Exception(string.Format("Directory {0} not found", dirPath));
             }
 
-            var list = await WalkDirThree(rootDir, notInclude);
+            var list = await WalkDirTree(rootDir);
 
-            for (int i = 0; i < list.Count; i++)
-            {
-                list[i] = PathStringOperations.RemoveStartFolder(list[i], dirPath);
-            }
+            ModifyList(dirPath, mode, list, needExt);
 
             return list;
         }
 
+        // TODO сделать тест сами создаем проверяем и удаляем
+        public async Task<List<string>> WalkDirTree(DirectoryInfo rootDir)
+        {
+            return Directory.EnumerateFiles(rootDir.FullName, "*.*", SearchOption.AllDirectories).ToList();
+        }
+
+        public void ModifyList(string dirPath, string mode, List<string> list, List<string> needExt)
+        {
+            switch (mode)
+            {
+                case "all":
+                    for (int i = 0; i < list.Count; i++)
+                    {
+                        list[i] = list[i].RemoveStartFolder(dirPath);
+                    }
+                    break;
+                case "cpp":
+                    if (needExt == null)
+                    {
+                        needExt = NeedExt;
+                    }
+
+                    list.RemoveAll(t => !needExt.Contains(Path.GetExtension(t)));
+                    for (int i = 0; i < list.Count; i++)
+                    {
+                        list[i] = list[i].RemoveStartFolder(dirPath).AddStringToPath(" /");
+                    }
+                    break;
+                case "reversed1":
+                    for (int i = 0; i < list.Count; i++)
+                    {
+                        list[i] = list[i].RemoveStartFolder(dirPath).ReverseFolderPath();
+                    }
+                    break;
+                case "reversed2":
+                    for (int i = 0; i < list.Count; i++)
+                    {
+                        list[i] = list[i].RemoveStartFolder(dirPath).ReverseAllPath();
+                    }
+                    break;
+            }
+        }
+
+        // TODO сделать тест
         public void CreateFile(List<string> fileList, string fileName)
         {
             if (fileName == null)
@@ -95,15 +88,6 @@ namespace Tool
                     }
                 }
             }
-        }
-
-        public void WriteLog(string text)
-        {
-            //if (Logs == null)
-            //{
-            //    Logs = new StringBuilder();
-            //}
-            //Logs.AppendFormat("{0}\n", text);
         }
     }
 }

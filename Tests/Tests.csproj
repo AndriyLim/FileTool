@@ -52,6 +52,8 @@
   <ItemGroup>
     <Compile Include="PathStringOperationsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="AttribureParserTests.cs" />
+    <Compile Include="FileListTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Tool\Tool.csproj">

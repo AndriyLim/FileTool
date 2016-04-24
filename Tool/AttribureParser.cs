@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Tool
 {
-    internal static class AttribureParser
+    public static class AttribureParser
     {
         static public List<string> Parse(string[] args, int attrCount)
         {
-            var list = args.ToList();
+            var list = args.Count() <= attrCount ? args.ToList() : args.Take(attrCount).ToList();
             while (list.Count < attrCount)
             {
                 list.Add(null);
